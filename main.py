@@ -8,7 +8,7 @@ class MainWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle("PSAGA")
-        self.setFixedSize(680, 601)
+        self.setFixedSize(680, 600)
         main_layout = QVBoxLayout()
         self.password_widget = PasswordGeneratorWidget()
         self.storage_widget = PasswordStorageWidget()
