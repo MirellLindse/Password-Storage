@@ -1,10 +1,10 @@
 import sqlite3
-from encryption import encrypt_password, decrypt_password, load_key
+from encryption import EncryptionManager
 
 class DatabaseManager:
-    def __init__(self):
+    def __init__(self, crypto_manager):
         self.conn = sqlite3.connect("passwords.db")
-        self.key = load_key()
+        self.crypto = crypto_manager
         self.create_table()
 
     def create_table(self):
@@ -19,23 +19,21 @@ class DatabaseManager:
         self.conn.commit()
 
     def save_password(self, website, email, password):
-        if not hasattr(self, 'key'):
-            self.key = load_key()
-        encrypted = encrypt_password(password, self.key)
-        self.conn.execute("INSERT INTO passwords (website, email, password) VALUES (?, ?, ?)",
-                          (website, email, encrypted))
+        encrypted = self.crypto.encrypt(password)
+        self.conn.execute(
+            "INSERT INTO passwords (website, email, password) VALUES (?, ?, ?)",
+            (website, email, encrypted)
+        )
         self.conn.commit()
 
     def get_all_passwords(self, offset=0, limit=5):
-        # Добавляем пагинацию через LIMIT и OFFSET
         query = "SELECT id, website, email, password FROM passwords LIMIT ? OFFSET ?"
         cursor = self.conn.execute(query, (limit, offset))
-
         return [{
             'id': row[0],
             'website': row[1],
             'email': row[2],
-            'password': decrypt_password(row[3], self.key)
+            'password': self.crypto.decrypt(row[3])
         } for row in cursor]
 
     def delete_password(self, entry_id):

@@ -1,26 +1,33 @@
+import base64
 from cryptography.fernet import Fernet
-import os
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.backends import default_backend
 
-# Генерируем ключ один раз и сохраняем его в файл
-def generate_key():
-    return Fernet.generate_key()
+class EncryptionManager:
+    def __init__(self, password: str, salt: bytes = b"some_hardcoded_salt_123"):
+        self.key = self._derive_key(password, salt)
+        self.fernet = Fernet(self.key)
 
-# Загружаем ключ из файла, если он существует
-def load_key():
-    if os.path.exists("key.key"):
-        with open("key.key", "rb") as key_file:
-            return key_file.read()
-    else:
-        # Если файл не найден, генерируем новый ключ и сохраняем его в файл
-        key = generate_key()
-        with open("key.key", "wb") as key_file:
-            key_file.write(key)
+    def _derive_key(self, password: str, salt: bytes) -> bytes:
+        """Creates a key from a password and salt"""
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100_000,
+            backend=default_backend()
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
         return key
 
-# Шифруем пароль
-def encrypt_password(password, key):
-    return Fernet(key).encrypt(password.encode()).decode()
+    def encrypt(self, plain_text: str) -> str:
+        return self.fernet.encrypt(plain_text.encode()).decode()
 
-# Дешифруем пароль
-def decrypt_password(encrypted_password, key):
-    return Fernet(key).decrypt(encrypted_password.encode()).decode()
+    def decrypt(self, cipher_text: str) -> str:
+        try:
+            # Важно: cipher_text в базе уже хранится как строка, а Fernet требует байты
+            decrypted = self.fernet.decrypt(cipher_text.encode())
+            return decrypted.decode()
+        except Exception:
+            return None  # Вместо "" чтобы явно видеть ошибку

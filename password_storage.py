@@ -5,6 +5,7 @@ class PasswordStorageWidget(QWidget):
     def __init__(self, db_manager):
         super().__init__()
         self.db_manager = db_manager
+        self.db_manager = DatabaseManager(crypto_manager)
 
         self.layout = QVBoxLayout(self)
         self.password_list = QListWidget()

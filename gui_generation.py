@@ -6,17 +6,21 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtCore import Qt
 from Generation import PasswordGenerator  # Import the PasswordGenerator class
 from db_manager import DatabaseManager
+from gui_storage import PasswordStorageWidget
 
 
 class PasswordGeneratorWidget(QWidget):
-    def __init__(self):
+    def __init__(self, db_manager, storage_widget):
         super().__init__()
-        self.db_manager = DatabaseManager()
-        self.setWindowTitle("Password Generator")  # Set window title
+        self.crypto = db_manager.crypto  # Если нужно шифрование
+        self.db_manager = db_manager
+        self.storage_widget = storage_widget
+        self.generator = PasswordGenerator()
 
-        self.generator = PasswordGenerator()  # Create a password generator instance
+        self.setWindowTitle("Password Generator")
+        self.layout = QVBoxLayout(self)
 
-        self.layout = QVBoxLayout(self)  # Main vertical layout
+        # и дальше твой код создания кнопок/инпутов
 
         # Create checkboxes for selecting password requirements
         self.special_chars_checkbox = QCheckBox("Special Characters")
@@ -123,7 +127,10 @@ class PasswordGeneratorWidget(QWidget):
         website = self.website_line_edit.text()
         email = self.mail_line_edit.text()
         password = self.password_out_line.text()
-        self.db_manager.save_password(website, email, password)
+
+        if website and email and password:
+            self.db_manager.save_password(website, email, password)
+            self.storage_widget.load_passwords()  # Reload the table
 
 
 
