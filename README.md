@@ -1,3 +1,5 @@
+[🇬🇧 English](README.en.md) | [🇪🇪 Eesti](README.et.md)
+
 # 🔐 Password Storage And Generation App (PSAGA)
 
 A small desktop application for securely storing passwords. Built using Python, PySide6, and SQLite. All passwords are encrypted before saving and can be conveniently copied to the clipboard with one button.
