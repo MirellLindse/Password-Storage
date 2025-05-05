@@ -1,4 +1,4 @@
-[🇬🇧 English](README.en.md) | [🇪🇪 Eesti](README.et.md)
+[Русский](README.en.md) | [Eesti](README.et.md)
 
 # 🔐 Password Storage And Generation App (PSAGA)
 
